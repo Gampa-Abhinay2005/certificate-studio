@@ -102,6 +102,7 @@
     .footer strong { color:#59667a; font-weight:700; }
     #toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%, 12px); padding:12px 17px; border-radius:10px; color:#fff; background:#152640; box-shadow:0 8px 28px rgba(0,0,0,.2); opacity:0; pointer-events:none; font-size:13px; transition:opacity .2s, transform .2s; z-index:20; max-width:calc(100vw - 28px); text-align:center; }
     #toast.show { opacity:1; transform:translate(-50%,0); }
+    .mobile-dock { display:none; }
     @media (max-width: 980px) {
       .workspace { grid-template-columns:minmax(285px, 350px) minmax(0,1fr); gap:14px; }
       .fields { padding:16px; } .panel-heading { padding:17px 16px 13px; }
@@ -112,27 +113,67 @@
       .main { padding-top:22px; }
       .intro { align-items:flex-start; }
       .privacy-tag { display:none; }
-      .workspace { grid-template-columns:1fr; }
+      .workspace { grid-template-columns:1fr; gap:16px; }
       .fields { grid-template-columns:1fr 1fr; }
-      .fields > .field, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:1 / -1; }
-      .preview-panel { grid-row:1; }
+      .fields > .field, .fields > .two-col, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:1 / -1; }
+      .preview-panel { grid-row:auto; scroll-margin-top:12px; }
+      .panel { scroll-margin-top:12px; }
       .preview-stage { padding:12px; }
       .footer { flex-direction:column; }
+      .mobile-dock {
+        position:fixed; z-index:30; left:0; right:0; bottom:0;
+        display:grid; grid-template-columns:minmax(92px,.8fr) minmax(0,1.4fr); gap:9px;
+        padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+        background:rgba(255,255,255,.96); border-top:1px solid #dfe5ed;
+        box-shadow:0 -8px 24px rgba(22,37,59,.09); backdrop-filter:blur(14px);
+      }
+      .mobile-dock .btn { min-height:48px; font-size:13px; padding:12px 10px; }
+      body.is-editing .mobile-dock { display:none; }
+      .mobile-dock .btn-secondary { background:#f7f9fc; }
+      #toast { bottom:calc(82px + env(safe-area-inset-bottom)); z-index:40; }
     }
     @media (max-width: 480px) {
-      .fields { grid-template-columns:1fr; }
-      .fields > .field, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:auto; }
-      .preview-title span { display:none; }
+      .main { padding:18px 12px calc(24px + 86px + env(safe-area-inset-bottom)); }
+      .topbar { padding:13px 14px; gap:10px; }
+      .brand { gap:9px; }
+      .brand-mark { width:35px; height:35px; border-radius:10px; }
+      .brand-name { font-size:17px; }
+      .brand-sub { font-size:9px; }
+      .main { padding-top:18px; }
+      .intro { margin-bottom:17px; }
+      .eyebrow { font-size:10px; }
+      h1 { font-size:29px; }
+      .intro p { font-size:13px; line-height:1.55; }
+      .panel, .preview-toolbar, .preview-stage { border-radius:12px; }
+      .panel-heading { padding:15px 14px 12px; }
+      .fields { grid-template-columns:1fr; padding:15px 14px 16px; gap:14px; }
+      .fields > .field, .fields > .two-col, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:auto; }
+      .two-col { grid-template-columns:1fr; gap:14px; }
+      .field { gap:7px; }
+      .field label { font-size:13px; }
+      .field input, .field textarea, .field select { font-size:16px; border-radius:11px; padding:12px; }
+      .field input, .field select { height:48px; }
+      .field textarea { min-height:90px; }
+      .theme-options { gap:7px; }
+      .theme-option { min-height:45px; justify-content:center; font-size:12px; padding:9px 7px; }
+      .swatch { width:14px; height:14px; }
+      .preview-title span { display:block; font-size:10px; }
       .live-status { font-size:0; }
       .live-dot { width:8px; height:8px; }
-      .preview-toolbar { padding:10px; }
-      .btn { padding:11px 12px; }
+      .preview-toolbar { padding:11px; gap:8px; }
+      .preview-stage { padding:8px; }
+      .canvas-wrap { box-shadow:0 7px 20px rgba(21,35,59,.13); }
+      .actions { display:grid; grid-template-columns:1fr; gap:9px; margin-top:12px; }
+      .actions .btn { min-height:48px; }
+      .action-caption { font-size:11px; margin-top:9px; }
+      .footer { font-size:10px; padding-top:16px; gap:7px; }
+      .mobile-dock .btn { font-size:12px; }
     }
     @page { size: A4 landscape; margin: 0; }
     @media print {
       html, body, .app-shell, .main, .workspace, .preview-panel, .preview-stage, .canvas-wrap { width:100% !important; height:auto !important; margin:0 !important; padding:0 !important; background:#fff !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
       body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-      .topbar, .intro, .panel, .preview-toolbar, .actions, .action-caption, .footer, #toast { display:none !important; }
+      .topbar, .intro, .panel, .preview-toolbar, .actions, .action-caption, .footer, #toast, .mobile-dock { display:none !important; }
       .main { max-width:none !important; }
       #certificate { width:100vw !important; height:auto !important; aspect-ratio:1400/990; }
       .preview-stage { page-break-inside:avoid; }
@@ -203,7 +244,7 @@
         </div>
       </section>
 
-      <section class="preview-panel" aria-label="Live certificate preview">
+      <section id="certificate-preview" class="preview-panel" aria-label="Live certificate preview">
         <div class="preview-toolbar">
           <div class="preview-title">
             <div class="preview-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M7 16h4"/></svg></div>
@@ -221,6 +262,10 @@
     </div>
     <div class="footer"><span><strong>certify.</strong> &nbsp;A little recognition goes a long way.</span><span>Designed for workshops, courses, events & achievements.</span></div>
   </main>
+</div>
+<div class="mobile-dock" aria-label="Quick actions">
+  <button id="mobilePreviewBtn" type="button" class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M7 16h4"/></svg> Preview</button>
+  <button id="mobileDownloadBtn" type="button" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 16v4h14v-4"/></svg> Download PNG</button>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -388,6 +433,19 @@
     },'image/png');
   });
   $('printBtn').addEventListener('click', () => { drawCertificate(); window.print(); });
+  $('mobileDownloadBtn').addEventListener('click', () => $('downloadBtn').click());
+  $('mobilePreviewBtn').addEventListener('click', () => {
+    $('certificate-preview').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  document.addEventListener('focusin', event => {
+    if (event.target.matches('input, textarea, select')) document.body.classList.add('is-editing');
+  });
+  document.addEventListener('focusout', () => {
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (!active || !active.matches('input, textarea, select')) document.body.classList.remove('is-editing');
+    }, 80);
+  });
   $('sampleBtn').addEventListener('click', () => {
     const sample={recipient:'Alex Morgan',award:'Excellence in Leadership',organization:'NORTHSTAR LEARNING ACADEMY',message:'In recognition of your dedication, outstanding effort, and commitment to excellence.',date:localToday,certid:'CERT-2026-001',signer:'Jordan Lee',role:'Program Director'};
     Object.entries(sample).forEach(([id,value])=>$(id).value=value);
