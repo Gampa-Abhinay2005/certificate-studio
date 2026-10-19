@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101a2b" />
+  <title>Certify — Certificate Studio</title>
+  <style>
+    :root {
+      --ink: #17253b;
+      --muted: #778196;
+      --line: #e1e6ed;
+      --panel: #ffffff;
+      --page: #f4f6fa;
+      --navy: #172d4b;
+      --gold: #b38b47;
+      --shadow: 0 18px 48px rgba(25, 40, 68, .10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, textarea, select { font: inherit; }
+    .app-shell { min-height: 100vh; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; padding: 19px clamp(18px, 4vw, 54px);
+      color: #f7f8fb; background: #101a2b;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand-mark {
+      width: 39px; height: 39px; border-radius: 12px; display:grid; place-items:center;
+      background: linear-gradient(145deg, #e8cf94, #aa7d39); color: #17253b;
+      box-shadow: inset 0 1px rgba(255,255,255,.55);
+    }
+    .brand-mark svg { width:22px; height:22px; }
+    .brand-name { font-size: 18px; font-weight: 760; letter-spacing: -.04em; }
+    .brand-sub { color: #aab5c7; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-top: 2px; }
+    .top-note { color: #b8c1d0; font-size: 12px; }
+    .main { max-width: 1600px; margin: 0 auto; padding: 28px clamp(14px, 3vw, 42px) 42px; }
+    .intro { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom: 22px; }
+    .eyebrow { color: #a47a36; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 7px; }
+    h1 { font-size: clamp(25px, 3vw, 36px); line-height:1.1; margin:0; letter-spacing:-.045em; font-weight:760; }
+    .intro p { color: var(--muted); margin: 8px 0 0; font-size: 14px; line-height:1.6; max-width: 620px; }
+    .privacy-tag { display:flex; align-items:center; gap:7px; color:#59667a; font-size:12px; white-space:nowrap; padding:9px 12px; border:1px solid #dfe5ed; border-radius:999px; background:#fff; }
+    .privacy-tag svg { width:14px; height:14px; color:#39866c; }
+    .workspace { display:grid; grid-template-columns: minmax(310px, 385px) minmax(0, 1fr); gap:22px; align-items:start; }
+    .panel { border:1px solid #e2e7ef; background:var(--panel); border-radius:17px; box-shadow:0 4px 18px rgba(24, 39, 65, .035); overflow:hidden; }
+    .panel-heading { padding:20px 21px 15px; border-bottom:1px solid #edf0f5; display:flex; justify-content:space-between; align-items:center; }
+    .panel-heading h2 { font-size:15px; margin:0; font-weight:750; letter-spacing:-.02em; }
+    .step { color:#a27a3a; background:#f9f3e8; border-radius:7px; padding:5px 8px; font-size:10px; font-weight:800; letter-spacing:.08em; }
+    .fields { padding:18px 21px 21px; display:grid; gap:15px; }
+    .field { display:grid; gap:7px; min-width:0; }
+    .field label { color:#3b475b; font-size:12px; font-weight:700; }
+    .field .hint { color:#8a94a6; font-weight:450; margin-left:4px; }
+    .field input, .field textarea, .field select {
+      width:100%; min-width:0; color:#1b2940; background:#fbfcfe; border:1px solid #dce2eb;
+      outline:0; border-radius:9px; padding:10px 12px; font-size:13px; transition:border-color .15s, box-shadow .15s;
+    }
+    .field input, .field select { height:41px; }
+    .field textarea { resize:vertical; min-height:66px; line-height:1.45; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color:#b28a48; box-shadow:0 0 0 3px rgba(179,139,71,.13); background:#fff; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    .divider { height:1px; background:#edf0f5; margin:1px 0 0; }
+    .section-label { color:#9a753a; font-size:10px; font-weight:850; letter-spacing:.14em; text-transform:uppercase; margin:0 0 -3px; }
+    .theme-options { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .theme-option { cursor:pointer; display:flex; align-items:center; gap:7px; border:1px solid #dce2eb; border-radius:9px; padding:8px; background:#fff; color:#4c586b; font-size:11px; font-weight:700; }
+    .theme-option input { position:absolute; opacity:0; width:1px; height:1px; }
+    .theme-option:has(input:checked) { border-color:#b38b47; background:#fcf8ef; color:#604a25; box-shadow:0 0 0 1px #b38b47 inset; }
+    .swatch { width:16px; height:16px; border-radius:5px; flex:0 0 auto; border:1px solid rgba(0,0,0,.08); }
+    .swatch.gold { background:#b38b47; } .swatch.blue { background:#315f91; } .swatch.green { background:#397462; }
+    .preview-panel { min-width:0; }
+    .preview-toolbar { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:15px 18px; border:1px solid #e2e7ef; background:#fff; border-radius:15px 15px 0 0; }
+    .preview-title { display:flex; gap:10px; align-items:center; }
+    .preview-icon { width:31px; height:31px; border-radius:9px; background:#f6f0e5; color:#9a7136; display:grid; place-items:center; }
+    .preview-icon svg { width:16px; height:16px; }
+    .preview-title strong { font-size:13px; display:block; }
+    .preview-title span { display:block; color:#818b9c; font-size:11px; margin-top:3px; }
+    .live-status { font-size:11px; color:#3c836d; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#43a17d; box-shadow:0 0 0 3px #e6f5ed; }
+    .preview-stage {
+      background:#e9edf3; padding:clamp(12px, 2vw, 28px); border:1px solid #e2e7ef; border-top:0;
+      border-radius:0 0 15px 15px; min-width:0;
+    }
+    .canvas-wrap { width:100%; background:#fffdf8; box-shadow:0 14px 34px rgba(21, 35, 59, .16); line-height:0; }
+    #certificate { display:block; width:100%; height:auto; aspect-ratio:1400/990; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:17px; }
+    .btn { cursor:pointer; border:0; border-radius:10px; padding:12px 16px; display:inline-flex; justify-content:center; align-items:center; gap:9px; font-weight:750; font-size:13px; transition:transform .12s, background .12s, box-shadow .12s; }
+    .btn:active { transform:translateY(1px); }
+    .btn svg { width:16px; height:16px; }
+    .btn-primary { flex:1 1 180px; background:#172d4b; color:#fff; box-shadow:0 5px 14px rgba(23,45,75,.18); }
+    .btn-primary:hover { background:#213e63; box-shadow:0 7px 18px rgba(23,45,75,.23); }
+    .btn-secondary { flex:1 1 160px; background:#fff; color:#344259; border:1px solid #dce2eb; }
+    .btn-secondary:hover { background:#f9fafc; }
+    .btn-text { padding:9px 0; background:transparent; color:#718096; font-size:12px; }
+    .action-caption { color:#8b95a5; font-size:11px; line-height:1.5; margin:11px 2px 0; }
+    .footer { display:flex; justify-content:space-between; gap:12px; color:#8a94a6; font-size:11px; padding:21px 2px 0; }
+    .footer strong { color:#59667a; font-weight:700; }
+    #toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%, 12px); padding:12px 17px; border-radius:10px; color:#fff; background:#152640; box-shadow:0 8px 28px rgba(0,0,0,.2); opacity:0; pointer-events:none; font-size:13px; transition:opacity .2s, transform .2s; z-index:20; max-width:calc(100vw - 28px); text-align:center; }
+    #toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns:minmax(285px, 350px) minmax(0,1fr); gap:14px; }
+      .fields { padding:16px; } .panel-heading { padding:17px 16px 13px; }
+      .preview-toolbar { padding:13px; }
+    }
+    @media (max-width: 760px) {
+      .top-note { display:none; }
+      .main { padding-top:22px; }
+      .intro { align-items:flex-start; }
+      .privacy-tag { display:none; }
+      .workspace { grid-template-columns:1fr; }
+      .fields { grid-template-columns:1fr 1fr; }
+      .fields > .field, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:1 / -1; }
+      .preview-panel { grid-row:1; }
+      .preview-stage { padding:12px; }
+      .footer { flex-direction:column; }
+    }
+    @media (max-width: 480px) {
+      .fields { grid-template-columns:1fr; }
+      .fields > .field, .fields > .divider, .fields > .section-label, .fields > .theme-options { grid-column:auto; }
+      .preview-title span { display:none; }
+      .live-status { font-size:0; }
+      .live-dot { width:8px; height:8px; }
+      .preview-toolbar { padding:10px; }
+      .btn { padding:11px 12px; }
+    }
+    @page { size: A4 landscape; margin: 0; }
+    @media print {
+      html, body, .app-shell, .main, .workspace, .preview-panel, .preview-stage, .canvas-wrap { width:100% !important; height:auto !important; margin:0 !important; padding:0 !important; background:#fff !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
+      body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .topbar, .intro, .panel, .preview-toolbar, .actions, .action-caption, .footer, #toast { display:none !important; }
+      .main { max-width:none !important; }
+      #certificate { width:100vw !important; height:auto !important; aspect-ratio:1400/990; }
+      .preview-stage { page-break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5a1.5 1.5 0 0 1 1-1.5Z"/><path d="M14 3.5V8h4M9 12h6M9 15h6M9 18h3"/></svg>
+      </div>
+      <div><div class="brand-name">certify<span style="color:#d7b46b">.</span></div><div class="brand-sub">Certificate studio</div></div>
+    </div>
+    <div class="top-note">Beautiful certificates, ready in moments</div>
+  </header>
+
+  <main class="main">
+    <section class="intro">
+      <div>
+        <div class="eyebrow">Create · Personalize · Celebrate</div>
+        <h1>Make it official.</h1>
+        <p>Design a polished certificate in seconds. Add the details, choose an accent, then download it or print it as a PDF.</p>
+      </div>
+      <div class="privacy-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Your details stay in this browser</div>
+    </section>
+
+    <div class="workspace">
+      <section class="panel" aria-label="Certificate details">
+        <div class="panel-heading"><h2>Certificate details</h2><span class="step">STEP 01</span></div>
+        <div class="fields">
+          <div class="field">
+            <label for="recipient">Recipient name</label>
+            <input id="recipient" value="Alex Morgan" maxlength="70" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="award">Certificate title</label>
+            <input id="award" value="Excellence in Leadership" maxlength="90" />
+          </div>
+          <div class="field">
+            <label for="organization">Issuing organization</label>
+            <input id="organization" value="NORTHSTAR LEARNING ACADEMY" maxlength="70" />
+          </div>
+          <div class="field">
+            <label for="message">Certificate message <span class="hint">(optional)</span></label>
+            <textarea id="message" maxlength="190">In recognition of your dedication, outstanding effort, and commitment to excellence.</textarea>
+          </div>
+          <div class="two-col">
+            <div class="field"><label for="date">Issue date</label><input id="date" type="date" /></div>
+            <div class="field"><label for="certid">Certificate ID</label><input id="certid" value="CERT-2026-001" maxlength="35" /></div>
+          </div>
+          <div class="divider"></div>
+          <p class="section-label">Authorized by</p>
+          <div class="two-col">
+            <div class="field"><label for="signer">Signatory name</label><input id="signer" value="Jordan Lee" maxlength="50" /></div>
+            <div class="field"><label for="role">Signatory title</label><input id="role" value="Program Director" maxlength="50" /></div>
+          </div>
+          <div class="field">
+            <label>Accent color</label>
+            <div class="theme-options" role="radiogroup" aria-label="Accent color">
+              <label class="theme-option"><input type="radio" name="theme" value="gold" checked /><span class="swatch gold"></span>Classic</label>
+              <label class="theme-option"><input type="radio" name="theme" value="blue" /><span class="swatch blue"></span>Royal</label>
+              <label class="theme-option"><input type="radio" name="theme" value="green" /><span class="swatch green"></span>Evergreen</label>
+            </div>
+          </div>
+          <button id="sampleBtn" class="btn btn-text" type="button">↻ Restore sample details</button>
+        </div>
+      </section>
+
+      <section class="preview-panel" aria-label="Live certificate preview">
+        <div class="preview-toolbar">
+          <div class="preview-title">
+            <div class="preview-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M7 16h4"/></svg></div>
+            <div><strong>Live preview</strong><span>Updates as you type</span></div>
+          </div>
+          <div class="live-status"><span class="live-dot"></span> Up to date</div>
+        </div>
+        <div class="preview-stage"><div class="canvas-wrap"><canvas id="certificate" width="1400" height="990" aria-label="Preview of your certificate"></canvas></div></div>
+        <div class="actions">
+          <button id="downloadBtn" type="button" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 16v4h14v-4"/></svg> Download certificate PNG</button>
+          <button id="printBtn" type="button" class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 11h.01"/></svg> Print / Save as PDF</button>
+        </div>
+        <p class="action-caption">PNG downloads as a high-resolution image. For a PDF, choose “Save as PDF” in your browser’s print dialog and select landscape orientation if needed.</p>
+      </section>
+    </div>
+    <div class="footer"><span><strong>certify.</strong> &nbsp;A little recognition goes a long way.</span><span>Designed for workshops, courses, events & achievements.</span></div>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const canvas = document.getElementById('certificate');
+  const ctx = canvas.getContext('2d');
+  const fields = ['recipient','award','organization','message','date','certid','signer','role'];
+  const $ = (id) => document.getElementById(id);
+  const today = new Date();
+  const localToday = [today.getFullYear(), String(today.getMonth()+1).padStart(2,'0'), String(today.getDate()).padStart(2,'0')].join('-');
+  $('date').value = localToday;
+  const palettes = {
+    gold: { accent:'#b18a48', dark:'#1b304d', pale:'#e8d8b7', stamp:'#a47a37' },
+    blue: { accent:'#376d9f', dark:'#1d3653', pale:'#c8dced', stamp:'#376d9f' },
+    green:{ accent:'#3e7868', dark:'#1d3b37', pale:'#c8ded5', stamp:'#347160' }
+  };
+  let toastTimer;
+  function toast(message) {
+    const el = $('toast'); el.textContent = message; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+  function getData() {
+    const data = {};
+    fields.forEach(id => data[id] = $(id).value.trim());
+    data.theme = document.querySelector('input[name="theme"]:checked')?.value || 'gold';
+    return data;
+  }
+  function fitFont(text, maxWidth, baseSize, minSize, family, weight='normal') {
+    let size = baseSize;
+    while (size > minSize) {
+      ctx.font = `${weight} ${size}px ${family}`;
+      if (ctx.measureText(text).width <= maxWidth) break;
+      size -= 1;
+    }
+    return size;
+  }
+  function letterSpacedText(text, x, y, spacing, color, font) {
+    ctx.save(); ctx.font = font; ctx.fillStyle = color; ctx.textAlign='left';
+    const chars = [...text];
+    const width = chars.reduce((sum,ch)=>sum+ctx.measureText(ch).width,0) + Math.max(0,chars.length-1)*spacing;
+    let cursor = x-width/2;
+    chars.forEach(ch => { ctx.fillText(ch,cursor,y); cursor += ctx.measureText(ch).width+spacing; });
+    ctx.restore();
+  }
+  function centeredWrapped(text, x, y, maxWidth, lineHeight, font, color, maxLines=3) {
+    if (!text) return y;
+    ctx.save(); ctx.font=font; ctx.fillStyle=color; ctx.textAlign='center';
+    const words=text.split(/\s+/); const lines=[]; let line='';
+    for (const word of words) {
+      const test=line ? line+' '+word : word;
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line=word; }
+      else line=test;
+    }
+    if (line) lines.push(line);
+    let shown=lines.slice(0,maxLines);
+    if (lines.length>maxLines) {
+      let last=shown[maxLines-1]; while (ctx.measureText(last+'…').width>maxWidth && last.length) last=last.slice(0,-1);
+      shown[maxLines-1]=last.trim()+'…';
+    }
+    shown.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));
+    ctx.restore(); return y+shown.length*lineHeight;
+  }
+  function drawStar(cx,cy,outer,inner,points=8) {
+    ctx.beginPath();
+    for(let i=0;i<points*2;i++) {
+      const a=-Math.PI/2+i*Math.PI/points; const r=i%2===0?outer:inner;
+      const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  function drawLaurel(cx,cy,color,flip=1) {
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=2.2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(cx,cy+43); ctx.bezierCurveTo(cx+flip*32,cy+20,cx+flip*33,cy-8,cx+flip*12,cy-29); ctx.stroke();
+    for(let i=0;i<6;i++) {
+      const t=i/6; const yy=cy+30-t*54; const xx=cx+flip*(8+Math.sin(t*Math.PI)*15);
+      ctx.beginPath(); ctx.ellipse(xx,yy,5.4,10,-flip*.6,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawCertificate() {
+    const d=getData(), p=palettes[d.theme] || palettes.gold;
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fffdf8'; ctx.fillRect(0,0,W,H);
+    // Fine paper grain is intentionally omitted to keep the output crisp when printed.
+    ctx.strokeStyle=p.dark; ctx.lineWidth=2.3; ctx.strokeRect(27,27,W-54,H-54);
+    ctx.strokeStyle=p.accent; ctx.lineWidth=1.5; ctx.strokeRect(42,42,W-84,H-84);
+    ctx.strokeStyle=p.pale; ctx.lineWidth=1;
+    ctx.strokeRect(53,53,W-106,H-106);
+    // Corner flourishes
+    const corners=[[68,68,1,1],[W-68,68,-1,1],[68,H-68,1,-1],[W-68,H-68,-1,-1]];
+    corners.forEach(([x,y,sx,sy])=>{
+      ctx.save(); ctx.translate(x,y); ctx.scale(sx,sy); ctx.strokeStyle=p.accent; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(0,26); ctx.bezierCurveTo(0,8,8,0,26,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(5,20); ctx.bezierCurveTo(5,10,10,5,20,5); ctx.stroke();
+      ctx.fillStyle=p.accent; drawStar(12,12,4,1.8,4); ctx.restore();
+    });
+    // Crest
+    const cx=W/2, crestY=128;
+    ctx.fillStyle='#fffaf0'; ctx.strokeStyle=p.accent; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(cx,crestY,35,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,crestY,28,0,Math.PI*2); ctx.strokeStyle=p.pale; ctx.lineWidth=1.3; ctx.stroke();
+    ctx.fillStyle=p.accent; drawStar(cx,crestY,19,8,8);
+    drawLaurel(cx-20,crestY+1,p.accent,-1); drawLaurel(cx+20,crestY+1,p.accent,1);
+    const org=(d.organization || 'YOUR ORGANIZATION').toLocaleUpperCase();
+    const orgSize=fitFont(org,900,25,15,'Arial','bold');
+    letterSpacedText(org,cx,210,2,p.dark,`bold ${orgSize}px Arial`);
+    ctx.fillStyle=p.accent; ctx.fillRect(cx-54,235,108,2);
+    ctx.fillStyle='#6f7785'; ctx.font='italic 24px Georgia, serif'; ctx.textAlign='center';
+    ctx.fillText('CERTIFICATE OF',cx,286);
+    ctx.fillStyle=p.dark;
+    const heading='ACHIEVEMENT';
+    const headingSize=fitFont(heading,900,59,42,'Georgia','bold');
+    ctx.font=`bold ${headingSize}px Georgia, serif`; ctx.fillText(heading,cx,348);
+    letterSpacedText('THIS CERTIFICATE IS PROUDLY PRESENTED TO',cx,402,2,'#858b95','bold 15px Arial');
+    const name=d.recipient || 'Recipient Name';
+    const nameSize=fitFont(name,1080,65,34,'Georgia','normal');
+    ctx.fillStyle=p.dark; ctx.font=`${nameSize}px Georgia, serif`; ctx.textAlign='center'; ctx.fillText(name,cx,486);
+    ctx.strokeStyle=p.accent; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx-145,510); ctx.lineTo(cx+145,510); ctx.stroke();
+    ctx.fillStyle=p.accent; drawStar(cx,510,6,2.8,4);
+    centeredWrapped(d.message || 'In recognition of your hard work and dedication.',cx,557,900,29,'20px Arial','#616b79',3);
+    const award=d.award || 'Certificate of Achievement';
+    const awardSize=fitFont(award,1040,38,24,'Georgia','bold');
+    ctx.fillStyle=p.dark; ctx.font=`bold ${awardSize}px Georgia, serif`; ctx.textAlign='center'; ctx.fillText(award,cx,674);
+    // Bottom signature & issue date
+    const baseY=804;
+    ctx.strokeStyle='#c9cdd3'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(190,baseY); ctx.lineTo(475,baseY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(925,baseY); ctx.lineTo(1210,baseY); ctx.stroke();
+    const dateStr=d.date ? new Date(d.date+'T12:00:00').toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}) : 'Date of issue';
+    ctx.fillStyle=p.dark; ctx.font='20px Georgia, serif'; ctx.textAlign='center'; ctx.fillText(dateStr,332.5,baseY-16);
+    ctx.fillStyle='#737d8b'; ctx.font='bold 13px Arial'; ctx.fillText('DATE OF ISSUE',332.5,baseY+25);
+    const signer=d.signer || 'Authorized Signatory';
+    const signerSize=fitFont(signer,270,21,13,'Georgia','normal');
+    ctx.fillStyle=p.dark; ctx.font=`italic ${signerSize}px Georgia, serif`; ctx.fillText(signer,1067.5,baseY-16);
+    ctx.fillStyle='#737d8b'; ctx.font='bold 13px Arial'; ctx.fillText(d.role || 'AUTHORIZED SIGNATORY',1067.5,baseY+25);
+    // Embossed award seal
+    const sx=700, sy=812;
+    ctx.fillStyle=p.pale; ctx.beginPath(); ctx.arc(sx,sy,51,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=p.accent; ctx.lineWidth=2.2; ctx.beginPath(); ctx.arc(sx,sy,45,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle=p.accent; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(sx,sy,37,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle=p.accent; drawStar(sx,sy-2,21,9,8);
+    // Ribbon tails
+    ctx.fillStyle=p.accent;
+    ctx.beginPath(); ctx.moveTo(sx-23,sy+34); ctx.lineTo(sx-18,sy+65); ctx.lineTo(sx-5,sy+54); ctx.lineTo(sx+1,sy+68); ctx.lineTo(sx+8,sy+35); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=p.pale; ctx.beginPath(); ctx.arc(sx,sy,29,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=p.accent; drawStar(sx,sy-2,17,7.5,8);
+    ctx.fillStyle='#8b929c'; ctx.font='12px Arial'; ctx.textAlign='center';
+    const id=(d.certid || '').trim();
+    if(id) letterSpacedText('CERTIFICATE ID  ·  '+id,cx,928,1,'#8b929c','12px Arial');
+    // Tiny footer ornaments
+    ctx.fillStyle=p.accent; drawStar(330,924,4,1.8,4); drawStar(1070,924,4,1.8,4);
+  }
+  fields.forEach(id => $(id).addEventListener('input', drawCertificate));
+  document.querySelectorAll('input[name="theme"]').forEach(el => el.addEventListener('change', drawCertificate));
+  $('downloadBtn').addEventListener('click', () => {
+    drawCertificate();
+    canvas.toBlob(blob => {
+      if(!blob) { toast('The image could not be generated. Please try again.'); return; }
+      const url=URL.createObjectURL(blob); const a=document.createElement('a');
+      const safeName=(getData().recipient || 'certificate').replace(/[^a-z0-9-_]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,50) || 'certificate';
+      a.href=url; a.download=`${safeName}_certificate.png`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000); toast('Your high-resolution certificate PNG has been downloaded.');
+    },'image/png');
+  });
+  $('printBtn').addEventListener('click', () => { drawCertificate(); window.print(); });
+  $('sampleBtn').addEventListener('click', () => {
+    const sample={recipient:'Alex Morgan',award:'Excellence in Leadership',organization:'NORTHSTAR LEARNING ACADEMY',message:'In recognition of your dedication, outstanding effort, and commitment to excellence.',date:localToday,certid:'CERT-2026-001',signer:'Jordan Lee',role:'Program Director'};
+    Object.entries(sample).forEach(([id,value])=>$(id).value=value);
+    document.querySelector('input[name="theme"][value="gold"]').checked=true;
+    drawCertificate(); toast('Sample details restored.');
+  });
+  drawCertificate();
+})();
+</script>
+</body>
+</html>
